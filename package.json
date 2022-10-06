@@ -1,0 +1,23 @@
+{
+  "name": "express-biztime",
+  "version": "1.0.0",
+  "description": "35.1 Springboard Exercise",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gah1289/express-biztime.git"
+  },
+  "author": "Gabby McCarthy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gah1289/express-biztime/issues"
+  },
+  "homepage": "https://github.com/gah1289/express-biztime#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "pg": "^8.8.0"
+  }
+}
