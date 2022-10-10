@@ -2,6 +2,7 @@ const express = require('express');
 const ExpressError = require('../expressError');
 const router = express.Router();
 const db = require('../db');
+const slugify = require('slugify');
 
 // GET /companies
 // Returns list of companies, like {companies: [{code, name}, ...]}
@@ -28,21 +29,31 @@ router.get('/:code', async (req, res, next) => {
 		let invoices_obj = await db.query('SELECT * FROM invoices WHERE comp_code=$1', [
 			code
 		]);
+		let industries_obj = await db.query('SELECT * FROM industries WHERE company=$1', [
+			code
+		]);
 		let invoices = [];
+		let industries = [];
 
 		if (invoices_obj.rows.length == 0) {
 			invoices = null;
 		}
+		if (industries_obj.rows.length == 0) {
+			industries = null;
+		}
 		else {
 			for (let invoice of invoices_obj.rows) {
 				invoices.push(invoice);
+			}
+			for (let industry of industries_obj.rows) {
+				industries.push(industry.industry);
 			}
 		}
 
 		if (results.rows.length === 0) {
 			throw new ExpressError(`Can't find company with code of ${code}`, 404);
 		}
-		return res.json({ company: results.rows, invoices });
+		return res.json({ company: results.rows, invoices, industries });
 	} catch (e) {
 		return next(e);
 	}
@@ -57,7 +68,8 @@ router.get('/:code', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
 	try {
-		const { code, name, description } = req.body;
+		const { name, description } = req.body;
+		const code = slugify(name);
 		const results = await db.query(
 			'INSERT INTO companies (code, name, description) VALUES ($1, $2, $3) RETURNING code, name, description',
 			[
@@ -110,6 +122,7 @@ router.put('/:code', async (req, res, next) => {
 // Returns {status: "deleted"}
 
 router.delete('/:code', async (req, res, next) => {
+	const code = req.params.code;
 	try {
 		const results = db.query('DELETE FROM companies WHERE code = $1', [
 			code

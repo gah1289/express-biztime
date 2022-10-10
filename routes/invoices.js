@@ -2,6 +2,7 @@ const express = require('express');
 const ExpressError = require('../expressError');
 const router = express.Router();
 const db = require('../db');
+const slugify = require('slugify');
 
 // GET /invoices
 // Return info on invoices: like {invoices: [{id, comp_code}, ...]}
@@ -46,13 +47,13 @@ router.get('/:id', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
 	try {
-		const { comp_Code, amt } = req.body;
+		const { comp_code, amt } = req.body;
 		const paid = false;
 		let paid_date = null;
 		const results = await db.query(
-			'INSERT INTO invoices (comp_Code, amt, paid, paid_date) VALUES ($1, $2, $3, $4) RETURNING comp_Code, amt, paid, paid_date',
+			'INSERT INTO invoices (comp_code, amt, paid, paid_date) VALUES ($1, $2, $3, $4) RETURNING comp_code, amt, paid, paid_date',
 			[
-				comp_Code,
+				comp_code,
 				amt,
 				paid,
 				paid_date
@@ -82,7 +83,7 @@ router.put('/:id', async (req, res, next) => {
 			id
 		]);
 		if (result.rows.length == 0) {
-			throw new ExpressError(`Cannot update invoice with id of ${id}`);
+			throw new ExpressError(`Cannot update invoice with id of ${id}`, 404);
 		}
 		currentPaidDate = result.rows[0].paid_date;
 
